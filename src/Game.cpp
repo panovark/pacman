@@ -217,6 +217,7 @@ void Game::run()
                         gameOverSnd_.play();
                     }
                     player_.reset();
+                    for(auto& g:ghosts_) g.reset();
                     break;
                 }
             }
