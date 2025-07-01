@@ -54,7 +54,7 @@ void Player::handleInput()
     if (sf::Keyboard::isKeyPressed(K::Down))  nextDir_ = Dir::Down;
 }
 
-// additional
+// direction
 sf::Vector2f Player::dirVec(Dir d) const
 {
     switch (d) {

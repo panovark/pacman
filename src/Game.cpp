@@ -20,71 +20,70 @@
 // texture singleton
 static const sf::Texture& tiles()
 {
-    static sf::Texture tex;
-    static bool loaded = false;
-    if (!loaded)
+    static sf::Texture* tex = nullptr;
+    if (!tex)
     {
-        if (!tex.loadFromFile("resources/textures/tiles.png"))
+        tex = new sf::Texture;
+        if (!tex->loadFromFile("resources/textures/tiles.png"))
             std::cerr << "ERROR: cannot load resources/textures/tiles.png\n";
-        loaded = true;
     }
-    return tex;
+    return *tex;
 }
 
 // buffer singletons
 static sf::SoundBuffer& startBuf()
 {
-    static sf::SoundBuffer buf; static bool ok = false;
-    if (!ok) {
-        if (!buf.loadFromFile("resources/audio/start.wav"))
+    static sf::SoundBuffer* buf = nullptr;
+    if (!buf) {
+        buf = new sf::SoundBuffer;
+        if (!buf->loadFromFile("resources/audio/start.wav"))
             std::cerr << "ERROR: cannot load resources/audio/start.wav\n";
-        ok = true;
     }
-    return buf;
+    return *buf;
 }
 
 static sf::SoundBuffer& sirenBuf()
 {
-    static sf::SoundBuffer buf; static bool ok = false;
-    if (!ok) {
-        if (!buf.loadFromFile("resources/audio/siren.wav"))
+    static sf::SoundBuffer* buf = nullptr;
+    if (!buf) {
+        buf = new sf::SoundBuffer;
+        if (!buf->loadFromFile("resources/audio/siren.wav"))
             std::cerr << "ERROR: cannot load resources/audio/siren.wav\n";
-        ok = true;
     }
-    return buf;
+    return *buf;
 }
 
 static sf::SoundBuffer& deathBuf()
 {
-    static sf::SoundBuffer buf; static bool ok = false;
-    if (!ok) {
-        if (!buf.loadFromFile("resources/audio/death.wav"))
+    static sf::SoundBuffer* buf = nullptr;
+    if (!buf) {
+        buf = new sf::SoundBuffer;
+        if (!buf->loadFromFile("resources/audio/death.wav"))
             std::cerr << "ERROR: cannot load resources/audio/death.wav\n";
-        ok = true;
     }
-    return buf;
+    return *buf;
 }
 
 static sf::SoundBuffer& gameOverBuf()
 {
-    static sf::SoundBuffer buf; static bool ok = false;
-    if (!ok) {
-        if (!buf.loadFromFile("resources/audio/gameover.wav"))
+    static sf::SoundBuffer* buf = nullptr;
+    if (!buf) {
+        buf = new sf::SoundBuffer;
+        if (!buf->loadFromFile("resources/audio/gameover.wav"))
             std::cerr << "ERROR: cannot load resources/audio/gameover.wav\n";
-        ok = true;
     }
-    return buf;
+    return *buf;
 }
 
 static sf::SoundBuffer& winBuf()
 {
-    static sf::SoundBuffer buf; static bool ok = false;
-    if (!ok) {
-        if (!buf.loadFromFile("resources/audio/win.wav"))
+    static sf::SoundBuffer* buf = nullptr;
+    if (!buf) {
+        buf = new sf::SoundBuffer;
+        if (!buf->loadFromFile("resources/audio/win.wav"))
             std::cerr << "ERROR: cannot load resources/audio/win.wav\n";
-        ok = true;
     }
-    return buf;
+    return *buf;
 }
 
 // ctor
@@ -162,12 +161,15 @@ void Game::run()
 {
     while (window_.isOpen())
     {
-        
+
 #if SFML_VERSION_MAJOR >= 3
         while (auto evOpt = window_.pollEvent())
         {
             const sf::Event& ev = *evOpt;
-            if (ev.is<sf::Event::Closed>()) window_.close();
+            if (ev.is<sf::Event::Closed>()) {
+                window_.close();
+                return;
+            }
 
             if ((levelCleared_ || gameOver_)
                 && ev.is<sf::Event::KeyPressed>()
@@ -177,7 +179,10 @@ void Game::run()
         sf::Event ev;
         while (window_.pollEvent(ev))
         {
-            if (ev.type == sf::Event::Closed) window_.close();
+            if (ev.type == sf::Event::Closed) {
+                window_.close();
+                return;
+            }
 
             if ((levelCleared_ || gameOver_)
                 && ev.type == sf::Event::KeyPressed
