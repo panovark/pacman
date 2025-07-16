@@ -8,7 +8,7 @@ class Ghost {
 public:
     Ghost(sf::Color color, sf::Vector2f start);
     void reset();
-    void update(const Level& lvl);
+    void update(const Level& lvl, const sf::Vector2f& target);
     void draw(sf::RenderTarget& rt) const { rt.draw(sprite_); }
     sf::Vector2f position() const { return sprite_.getPosition(); }
 private:
@@ -22,4 +22,3 @@ private:
     Dir curDir_{Dir::Left};
     bool onTeleport_ = false;
 };
-
