@@ -2,6 +2,7 @@
 #include <array>
 #include <algorithm>
 #include <cmath>
+#include <limits>
 
 Ghost::Ghost(sf::Color color, sf::Vector2f start) : start_(start) {
     sprite_.setRadius(PAC_RADIUS);
@@ -46,7 +47,7 @@ Ghost::Dir Ghost::opposite(Dir d){
     }
 }
 
-void Ghost::update(const Level& lvl){
+void Ghost::update(const Level& lvl, const sf::Vector2f& target){
     auto pos = sprite_.getPosition();
     int gx=int(pos.x/TILE), gy=int(pos.y/TILE);
     sf::Vector2f center{TILE*(gx+0.5f),TILE*(gy+0.5f)};
@@ -56,10 +57,28 @@ void Ghost::update(const Level& lvl){
     if(!canMove(lvl,next) || atCenter){
         static std::mt19937 rng(std::random_device{}());
         std::array<Dir,4> d{Dir::Left,Dir::Right,Dir::Up,Dir::Down};
-        std::shuffle(d.begin(), d.end(), rng);
+        Dir bestDir = curDir_;
+        float bestDist = std::numeric_limits<float>::max();
         for(auto nd:d){
             if(nd==opposite(curDir_)) continue;
-            if(canMove(lvl,center+dirVec(nd))){ curDir_=nd; break; }
+            sf::Vector2f candidate = center + dirVec(nd);
+            if(!canMove(lvl,candidate)) continue;
+            float dx = target.x - candidate.x;
+            float dy = target.y - candidate.y;
+            float dist = dx*dx + dy*dy;
+            if(dist < bestDist){
+                bestDist = dist;
+                bestDir = nd;
+            }
+        }
+        if(bestDist < std::numeric_limits<float>::max()){
+            curDir_ = bestDir;
+        } else {
+            std::shuffle(d.begin(), d.end(), rng);
+            for(auto nd:d){
+                if(nd==opposite(curDir_)) continue;
+                if(canMove(lvl,center+dirVec(nd))){ curDir_=nd; break; }
+            }
         }
     }
 
