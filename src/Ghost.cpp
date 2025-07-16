@@ -2,6 +2,7 @@
 #include <array>
 #include <algorithm>
 #include <cmath>
+#include <limits>
 
 Ghost::Ghost(sf::Color color, sf::Vector2f start) : start_(start) {
     sprite_.setRadius(PAC_RADIUS);
@@ -46,7 +47,7 @@ Ghost::Dir Ghost::opposite(Dir d){
     }
 }
 
-void Ghost::update(const Level& lvl){
+void Ghost::update(const Level& lvl, const sf::Vector2f& playerPos){
     auto pos = sprite_.getPosition();
     int gx=int(pos.x/TILE), gy=int(pos.y/TILE);
     sf::Vector2f center{TILE*(gx+0.5f),TILE*(gy+0.5f)};
@@ -56,11 +57,23 @@ void Ghost::update(const Level& lvl){
     if(!canMove(lvl,next) || atCenter){
         static std::mt19937 rng(std::random_device{}());
         std::array<Dir,4> d{Dir::Left,Dir::Right,Dir::Up,Dir::Down};
-        std::shuffle(d.begin(), d.end(), rng);
+        std::shuffle(d.begin(), d.end(), rng); // randomize tie-breaks
+
+        float bestDist = std::numeric_limits<float>::max();
+        Dir bestDir = curDir_;
+
         for(auto nd:d){
             if(nd==opposite(curDir_)) continue;
-            if(canMove(lvl,center+dirVec(nd))){ curDir_=nd; break; }
+            if(canMove(lvl,center+dirVec(nd))){
+                sf::Vector2f np = center + dirVec(nd);
+                float dist = std::hypot(np.x - playerPos.x, np.y - playerPos.y);
+                if(dist < bestDist){
+                    bestDist = dist;
+                    bestDir = nd;
+                }
+            }
         }
+        curDir_ = bestDir;
     }
 
     sprite_.move(dirVec(curDir_));
