@@ -209,7 +209,7 @@ void Game::run()
         {
             player_.handleInput();
             player_.update(level_);
-            for(auto& g:ghosts_) g.update(level_);
+            for(auto& g:ghosts_) g.update(level_, player_.position());
 
             for(auto& g:ghosts_){
                 sf::Vector2f d = g.position() - player_.position();
