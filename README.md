@@ -34,4 +34,6 @@ Launch the game from the build directory:
 ./build/PacMan
 ```
 
-Enjoy!
+## 📄 License
+
+[MIT](LICENSE) © 2025 Arkadiy Panov
